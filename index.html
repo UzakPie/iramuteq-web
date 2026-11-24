@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IRaMuTeQ Web Studio — Interactive Lexical &amp; Reinert Text-Mining Suite</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .custom-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1000px) {
+      .custom-grid { grid-template-columns: 1fr; }
+    }
+    .guide-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .guide-box code {
+      font-family: var(--font-mono);
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .quick-sample-btn {
+      font-size: 11px;
+      padding: 4px 9px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .quick-sample-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: var(--border-highlight);
+    }
+    .toast-banner {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-highlight);
+      color: var(--text-main);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 1300;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: all 0.25s ease;
+      max-width: 440px;
+    }
+    .toast-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .form-field label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .preview-table-cell {
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="logo-area">
+      <div class="logo-badge">IR</div>
+      <div class="logo-text">
+        <h1>
+          <span data-i18n="appTitle">IRaMuTeQ Web Studio</span>
+          <span class="badge-pro">WEB SUITE</span>
+        </h1>
+        <p data-i18n="appSubtitle">Interactive Lexical Analysis, Reinert CHD &amp; Correspondence Factor Mining</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="select-wrapper">
+        <select id="dataset-selector" class="dataset-select" data-i18n-title="datasetSelectorTitle" title="Select text corpus"></select>
+      </div>
+      <button id="header-demo-btn" class="btn btn-ghost" onclick="loadDemoDataset()" data-i18n="loadDemoBtn">
+        ⚡ Load Demo Dataset
+      </button>
+      <div class="lang-switcher" role="group" aria-label="Language switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="fr">FR</button>
+        <button class="lang-btn" data-lang="ru">RU</button>
+      </div>
+      <button id="theme-toggle-btn" class="btn btn-ghost btn-icon" data-i18n-title="themeToggleTitle" title="Toggle color theme">☀️</button>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <div class="app-container">
+
+    <!-- Left Sidebar Navigation -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section-title" data-i18n="navSectionAnalysis">CORPUS ANALYSIS</div>
+        <div class="nav-item active" data-tab="corpus">
+          <span class="nav-icon">📊</span>
+          <span data-i18n="navCorpus">Corpus Overview</span>
+          <span class="nav-badge">Zipf</span>
+        </div>
+        <div class="nav-item" data-tab="reinert">
+          <span class="nav-icon">🌳</span>
+          <span data-i18n="navReinert">Reinert Method (CHD)</span>
+          <span class="nav-badge">CHD</span>
+        </div>
+        <div class="nav-item" data-tab="afc">
+          <span class="nav-icon">🧭</span>
+          <span data-i18n="navAfc">Correspondence Analysis</span>
+          <span class="nav-badge">AFC</span>
+        </div>
+        <div class="nav-item" data-tab="similitude">
+          <span class="nav-icon">🕸️</span>
+          <span data-i18n="navSimilitude">Similitude Graph</span>
+          <span class="nav-badge">MST</span>
+        </div>
+        <div class="nav-item" data-tab="clouds">
+          <span class="nav-icon">☁️</span>
+          <span data-i18n="navClouds">Lexical Word Clouds</span>
+          <span class="nav-badge">Cloud</span>
+        </div>
+        <div class="nav-item" data-tab="specificity">
+          <span class="nav-icon">⚖️</span>
+          <span data-i18n="navSpecificity">Specificity Analysis</span>
+          <span class="nav-badge">Spec χ²</span>
+        </div>
+        <div class="nav-item" data-tab="kwic">
+          <span class="nav-icon">🔍</span>
+          <span data-i18n="navKwic">Concordancer (KWIC)</span>
+          <span class="nav-badge">KWIC</span>
+        </div>
+        <div class="nav-item" data-tab="meta">
+          <span class="nav-icon">📈</span>
+          <span data-i18n="navMeta">Metadata Cross-Tab</span>
+          <span class="nav-badge">χ²</span>
+        </div>
+
+        <div class="nav-section-title" data-i18n="navSectionTools">DATA &amp; IMPORT</div>
+        <div class="nav-item" data-tab="custom">
+          <span class="nav-icon">📂</span>
+          <span data-i18n="navCustom">Import / Live Corpus</span>
+          <span class="nav-badge" style="background:rgba(16,185,129,0.2); color:#10b981;">CSV/XLSX</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="corpus-status-pill">
+          <span class="status-dot"></span>
+          <span id="corpus-status-text">Loading...</span>
+        </div>
+        <div id="nlp-backend-pill" style="color:var(--text-dim); font-size:10px; line-height:1.45;">
+          IRaMuTeQ Web Studio v3.5<br/>EN/FR/RU Lemmatizer • CHD • AFC • Spec
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content Workspace -->
+    <main class="main-content">
+
+      <!-- ACTIVE CUSTOM EXCLUDED STOPWORDS BAR (visible across all charts when non-empty) -->
+      <div id="excluded-stopwords-bar" class="stopwords-bar" aria-live="polite">
+        <span style="font-size:12px; font-weight:700; color:#fca5a5;" data-i18n="excludedStopwordsLabel">Excluded Stopwords:</span>
+        <div id="excluded-stopwords-chips" style="display:flex; gap:6px; flex-wrap:wrap; flex:1;"></div>
+        <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="resetExcludedStopwords()" data-i18n="resetStopwordsBtn">Reset All</button>
+      </div>
+
+      <!-- VIEW 1: CORPUS OVERVIEW & STATS -->
+      <div id="tab-corpus" class="tab-pane active">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="navCorpus">Corpus Overview</h2>
+            <p data-i18n="zipfSub">Log-log rank-frequency distribution compared against theoretical Zipf's law f = C / r</p>
+          </div>
+          <div class="section-actions" style="flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="copyMethodologyBlock()">
+              <span>📋</span> <span data-i18n="copyMethodologyBtn">Copy Methodology</span>
+            </button>
+            <div class="export-theme-toggle" role="group" data-i18n-title="exportThemeTitle" title="Export chart theme">
+              <button class="export-theme-btn active" data-export-theme="dark" onclick="setExportTheme('dark')" data-i18n="exportDark">Dark</button>
+              <button class="export-theme-btn white-mode" data-export-theme="white" onclick="setExportTheme('white')" data-i18n="exportWhitePaper">White Paper</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSvg('zipf-svg', 'zipf_chart.svg')">
+              <span>📥</span> <span data-i18n="exportSvg">Export SVG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportPng('zipf-svg', 'zipf_chart.png')">
+              <span>🖼️</span> <span data-i18n="exportPng">Export PNG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportCsv('vocab')">
+              <span>📊</span> <span data-i18n="exportCsv">Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Demo & Importer Callout -->
+        <div class="hero-action-bar">
+          <div class="hero-action-info">
+            <strong data-i18n="heroTitle">Explore immediately or analyze your own spreadsheet / corpus</strong>
+            <span data-i18n="heroSubtitle">Test every visualization with the built-in anonymized sample dataset (260 entries) or import raw .csv, .xlsx, or IRaMuTeQ .txt files.</span>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="loadDemoDataset()">
+              <span>⚡</span> <span data-i18n="loadDemoBtn">Load Demo Dataset</span>
+            </button>
+            <button class="btn btn-ghost" onclick="switchToTab('custom')">
+              <span>📂</span> <span data-i18n="importDataBtn">Import CSV / Excel / .txt</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="docsCount">Documents</span>
+            <span id="stat-docs" class="stat-val">-</span>
+            <span class="stat-sub" data-i18n="docsSub">Initial Context Units (UCI)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="segmentsCount">Text Segments (UCE)</span>
+            <span id="stat-segments" class="stat-val">-</span>
+            <span class="stat-sub" data-i18n="segmentsSub">Elementary Context Units</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="tokensCount">Active Tokens</span>
+            <span id="stat-tokens" class="stat-val">-</span>
+            <span class="stat-sub" data-i18n="tokensSub">Lemmatized lexical occurrences</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="formsCount">Unique Lemmas</span>
+            <span id="stat-forms" class="stat-val">-</span>
+            <span class="stat-sub" data-i18n="formsSub">Dictionary base forms</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="hapaxPct">Hapax Legomena</span>
+            <span id="stat-hapax" class="stat-val">-</span>
+            <span class="stat-sub" data-i18n="hapaxSub">Single-occurrence lemmas</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="ttr">Lexical Richness (TTR)</span>
+            <span id="stat-ttr" class="stat-val">-</span>
+            <span class="stat-sub">Type-Token Ratio</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="avgUceLen">Mean UCE Length</span>
+            <span id="stat-len" class="stat-val">-</span>
+            <span class="stat-sub" data-i18n="avgUceSub">Active lemmas per segment</span>
+          </div>
+        </div>
+
+        <!-- Charts Layout -->
+        <div class="dendrogram-split-grid" style="grid-template-columns: 1.4fr 1fr;">
+          <div class="card">
+            <div class="card-title">
+              <span data-i18n="zipfTitle">Zipf's Law (Rank vs. Frequency)</span>
+              <span class="nav-badge" style="background:rgba(99,102,241,0.15); color:var(--accent-primary);">Log-Log Scale</span>
+            </div>
+            <div id="zipf-chart" class="chart-container" style="height:420px;"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span data-i18n="dominantConcepts">Dominant Corpus Lemmas</span>
+              <span class="nav-badge" data-i18n="top15Badge">Top 15 Lemmas</span>
+            </div>
+            <div class="table-wrapper" style="max-height:420px; overflow-y:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width:55px;" data-i18n="rank">Rank</th>
+                    <th data-i18n="word">Lemma</th>
+                    <th data-i18n="corpusFreqCol">Corpus Frequency</th>
+                  </tr>
+                </thead>
+                <tbody id="top-vocab-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: REINERT METHOD (CHD), DENDROGRAM & CHI2 TABLE -->
+      <div id="tab-reinert" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="reinertTitle">Reinert Descending Hierarchical Classification (CHD)</h2>
+            <p data-i18n="reinertSub">Iterative SVD bipartitioning of elementary context units into lexical classes with χ² profiling</p>
+          </div>
+          <div class="section-actions" style="flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="copyMethodologyBlock()">
+              <span>📋</span> <span data-i18n="copyMethodologyBtn">Copy Methodology</span>
+            </button>
+            <div class="export-theme-toggle" role="group" data-i18n-title="exportThemeTitle" title="Export chart theme">
+              <button class="export-theme-btn active" data-export-theme="dark" onclick="setExportTheme('dark')" data-i18n="exportDark">Dark</button>
+              <button class="export-theme-btn white-mode" data-export-theme="white" onclick="setExportTheme('white')" data-i18n="exportWhitePaper">White Paper</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSvg('dendro-svg', 'reinert_dendrogram.svg')">
+              <span>📥</span> <span data-i18n="exportSvg">Export SVG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportPng('dendro-svg', 'reinert_dendrogram.png')">
+              <span>🖼️</span> <span data-i18n="exportPng">Export PNG</span>
+            </button>
+            <button class="btn btn-primary" onclick="exportCsv('chi2_filtered')">
+              <span>📊</span> <span data-i18n="exportChi2Csv">Export χ² CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Full-Width Reinert Classification Dendrogram -->
+        <div class="card">
+          <div class="card-title">
+            <span data-i18n="dendrogramTitle">Reinert Classification Dendrogram (CHD Tree)</span>
+            <span class="nav-badge" data-i18n="dendrogramBadge">Hierarchical Splits • Click class branch to inspect</span>
+          </div>
+          <div id="class-share-strip" class="class-share-strip"></div>
+          <div id="dendrogram-tree" class="chart-container" style="height:370px;"></div>
+        </div>
+
+        <!-- Searchable & Exportable Chi-Square Statistics Table -->
+        <div class="card">
+          <div class="card-title" style="flex-wrap:wrap; gap:10px;">
+            <span data-i18n="chi2TableTitle">Chi-Square (χ²) Lexical Statistics Table</span>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span id="chi2-row-count" class="nav-badge">0 rows</span>
+              <button class="btn btn-ghost" onclick="exportCsv('chi2_filtered')">
+                <span>📊</span> <span data-i18n="exportCsv">Export CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="view-toolbar" style="margin-bottom:14px;">
+            <div class="toolbar-group" id="chi2-class-pills"></div>
+            <div class="toolbar-group">
+              <input id="chi2-search-input" class="input-search" type="text" data-i18n-ph="searchLemmaPlaceholder" placeholder="Filter lemmas...">
+            </div>
+          </div>
+
+          <div class="table-wrapper" style="max-height:360px; overflow-y:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="word"><span data-i18n="word">Lemma</span><span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="class_id"><span data-i18n="classLabel">Class</span><span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="freq_class"><span data-i18n="freqClass">Freq in Class</span><span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="freq_total"><span data-i18n="freqTotal">Total Freq</span><span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="pct_class"><span data-i18n="pctCol">%</span><span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="chi2"><span data-i18n="chi2">Chi-square (χ²)</span><span class="sort-indicator">▼</span></th>
+                  <th class="sortable" data-sort="p_value_num"><span data-i18n="pVal">p-value</span><span class="sort-indicator"></span></th>
+                </tr>
+              </thead>
+              <tbody id="chi2-stats-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Class Cards & Selected Class Metadata + Typical Segments -->
+        <div class="dendrogram-split-grid">
+          <div class="card">
+            <div class="card-title">
+              <span data-i18n="reinertClassesTitle">Reinert Lexical Classes</span>
+              <span class="nav-badge" data-i18n="clickToSelect">Click to inspect</span>
+            </div>
+            <div id="class-cards-container" class="class-card-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <h3 id="selected-class-title" style="font-size:15px; margin:0;" data-i18n="selectedClassProfile">Selected Class Profile</h3>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--text-muted);" data-i18n="associatedMetadataTitle">
+                Associated Metadata Variables (*variable_modality)
+              </div>
+              <div class="table-wrapper" style="max-height:160px; overflow-y:auto;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="modality">Metadata Variable</th>
+                      <th data-i18n="chi2">Chi-square (χ²)</th>
+                      <th data-i18n="freqShort">Freq</th>
+                      <th data-i18n="pctClass">% Class</th>
+                    </tr>
+                  </thead>
+                  <tbody id="class-meta-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--text-muted);" data-i18n="typicalSegments">
+                Characteristic Text Segments (Top χ² UCEs)
+              </div>
+              <div id="class-segments-container" style="max-height:360px; overflow-y:auto;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: CORRESPONDENCE FACTOR ANALYSIS (AFC / CA) -->
+      <div id="tab-afc" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="afcTitle">Correspondence Factor Analysis (AFC / CA)</h2>
+            <p data-i18n="afcSub">2D projection of Reinert classes and active lemmas onto factorial axes (SVD on standardized residuals). Click any point or class badge to inspect original quotes.</p>
+          </div>
+          <div class="section-actions" style="flex-wrap:wrap;">
+            <div class="export-theme-toggle" role="group" data-i18n-title="exportThemeTitle" title="Export chart theme">
+              <button class="export-theme-btn active" data-export-theme="dark" onclick="setExportTheme('dark')" data-i18n="exportDark">Dark</button>
+              <button class="export-theme-btn white-mode" data-export-theme="white" onclick="setExportTheme('white')" data-i18n="exportWhitePaper">White Paper</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSvg('afc-svg', 'afc_factor_biplot.svg')">
+              <span>📥</span> <span data-i18n="exportSvg">Export SVG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportPng('afc-svg', 'afc_factor_biplot.png')">
+              <span>🖼️</span> <span data-i18n="exportPng">Export PNG</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="view-toolbar">
+          <div class="toolbar-group" id="afc-inertia-badges"></div>
+
+          <div class="toolbar-group">
+            <span class="control-label" data-i18n="axesLabel">Axes:</span>
+            <select id="afc-axis-selector" class="dataset-select" style="padding:6px 28px 6px 10px;">
+              <option value="f1-f2">Axis 1 × Axis 2</option>
+              <option value="f1-f3">Axis 1 × Axis 3</option>
+              <option value="f2-f3">Axis 2 × Axis 3</option>
+            </select>
+          </div>
+
+          <div class="toolbar-group">
+            <span class="control-label" data-i18n="labelsLabel">Labels:</span>
+            <select id="afc-label-mode" class="dataset-select" style="padding:6px 28px 6px 10px;">
+              <option value="top" data-i18n="labelsTop">Top words (χ² ≥ 15)</option>
+              <option value="all" data-i18n="labelsAll">All active words</option>
+              <option value="hover" data-i18n="labelsHover">On hover only</option>
+            </select>
+          </div>
+
+          <div class="toolbar-group">
+            <span class="control-label" data-i18n="thresholdLabel">Min. Frequency:</span>
+            <input id="afc-thresh-slider" class="range-input" type="range" min="1" max="15" value="3">
+            <span id="afc-thresh-val" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-primary); width:22px;">3</span>
+          </div>
+
+          <div class="toolbar-group">
+            <button id="afc-zoom-in" class="btn btn-ghost btn-icon" data-i18n-title="zoomIn" title="Zoom in">+</button>
+            <button id="afc-zoom-out" class="btn btn-ghost btn-icon" data-i18n-title="zoomOut" title="Zoom out">−</button>
+            <button id="afc-zoom-reset" class="btn btn-ghost btn-icon" data-i18n-title="resetZoom" title="Reset view">↺</button>
+          </div>
+
+          <div class="toolbar-group">
+            <input id="afc-search-input" class="input-search" type="text" data-i18n-ph="searchPlaceholder" placeholder="Search lemma...">
+          </div>
+        </div>
+
+        <div class="card" style="padding:10px;">
+          <div id="afc-chart" class="chart-container" style="height:560px;"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: SIMILARITY ANALYSIS (SIMILITUDE GRAPH) -->
+      <div id="tab-similitude" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="simTitle">Similitude Analysis (Co-Occurrence Network)</h2>
+            <p data-i18n="simSub">Lemma co-occurrence graph and Maximum Spanning Tree (Arbre de similitude). Click any node to focus its ego-network and read original quotes.</p>
+          </div>
+          <div class="section-actions" style="flex-wrap:wrap;">
+            <div class="export-theme-toggle" role="group" data-i18n-title="exportThemeTitle" title="Export chart theme">
+              <button class="export-theme-btn active" data-export-theme="dark" onclick="setExportTheme('dark')" data-i18n="exportDark">Dark</button>
+              <button class="export-theme-btn white-mode" data-export-theme="white" onclick="setExportTheme('white')" data-i18n="exportWhitePaper">White Paper</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSvg('sim-svg', 'similitude_graph.svg')">
+              <span>📥</span> <span data-i18n="exportSvg">Export SVG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportPng('sim-svg', 'similitude_graph.png')">
+              <span>🖼️</span> <span data-i18n="exportPng">Export PNG</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="view-toolbar">
+          <div class="toolbar-group">
+            <span class="control-label" data-i18n="graphModeLabel">Graph Mode:</span>
+            <select id="sim-mode-toggle" class="dataset-select" style="padding:6px 28px 6px 10px;">
+              <option value="mst" data-i18n="toggleMst">Spanning Tree (MST)</option>
+              <option value="all" data-i18n="toggleFullGraph">Full Co-Occurrence Graph</option>
+            </select>
+          </div>
+
+          <div class="toolbar-group">
+            <span class="control-label" data-i18n="edgeThresholdLabel">Edge Threshold:</span>
+            <input id="sim-thresh-slider" class="range-input" type="range" min="0.01" max="0.30" step="0.01" value="0.05">
+            <span id="sim-thresh-val" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-primary); width:36px;">0.05</span>
+          </div>
+
+          <div class="toolbar-group">
+            <button id="sim-physics-toggle" class="btn btn-ghost" data-i18n="pausePhysics">⏸ Pause</button>
+            <button id="sim-zoom-in" class="btn btn-ghost btn-icon" data-i18n-title="zoomIn" title="Zoom in">+</button>
+            <button id="sim-zoom-out" class="btn btn-ghost btn-icon" data-i18n-title="zoomOut" title="Zoom out">−</button>
+            <button id="sim-zoom-reset" class="btn btn-ghost btn-icon" data-i18n-title="resetZoom" title="Reset view">↺</button>
+          </div>
+
+          <div class="toolbar-group">
+            <input id="sim-search-input" class="input-search" type="text" data-i18n-ph="searchPlaceholder" placeholder="Search lemma...">
+          </div>
+        </div>
+
+        <div class="card" style="padding:10px;">
+          <div id="similitude-chart" class="chart-container" style="height:560px;"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: LEXICAL WORD CLOUDS -->
+      <div id="tab-clouds" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="cloudsTitle">Lexical Word Clouds</h2>
+            <p data-i18n="cloudsSub">Dominant concepts across the entire corpus and per Reinert lexical class. Click any word to view its statistics and original quotes.</p>
+          </div>
+          <div class="section-actions" style="flex-wrap:wrap;">
+            <div class="export-theme-toggle" role="group" data-i18n-title="exportThemeTitle" title="Export chart theme">
+              <button class="export-theme-btn active" data-export-theme="dark" onclick="setExportTheme('dark')" data-i18n="exportDark">Dark</button>
+              <button class="export-theme-btn white-mode" data-export-theme="white" onclick="setExportTheme('white')" data-i18n="exportWhitePaper">White Paper</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSvg('cloud-svg', 'wordcloud.svg')">
+              <span>📥</span> <span data-i18n="exportSvg">Export SVG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportPng('cloud-svg', 'wordcloud.png')">
+              <span>🖼️</span> <span data-i18n="exportPng">Export PNG</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="view-toolbar" style="justify-content:space-between;">
+          <div class="toolbar-group" id="cloud-pills"></div>
+          <div class="toolbar-group">
+            <span class="control-label" data-i18n="weightingLabel">Weighting:</span>
+            <button id="cloud-metric-freq" class="btn btn-primary" onclick="setCloudMetric('freq')" data-i18n="weightFreq">Frequency</button>
+            <button id="cloud-metric-chi2" class="btn btn-ghost" onclick="setCloudMetric('chi2')" data-i18n="weightChi2">Significance (χ²)</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:10px;">
+          <div id="wordcloud-canvas-wrapper" class="word-cloud-wrapper" style="height:540px;"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 6: METADATA SPECIFICITY ANALYSIS (SUB-CORPUS CHI2 COMPARISON) -->
+      <div id="tab-specificity" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="specTitle">Metadata Specificity Analysis (Sub-Corpus χ²)</h2>
+            <p data-i18n="specSub">Diverging comparison of statistically over-represented (+χ²) and under-represented (−χ²) lemmas across illustrative metadata groups. Click any bar to inspect original quotes.</p>
+          </div>
+          <div class="section-actions" style="flex-wrap:wrap;">
+            <div class="export-theme-toggle" role="group" data-i18n-title="exportThemeTitle" title="Export chart theme">
+              <button class="export-theme-btn active" data-export-theme="dark" onclick="setExportTheme('dark')" data-i18n="exportDark">Dark</button>
+              <button class="export-theme-btn white-mode" data-export-theme="white" onclick="setExportTheme('white')" data-i18n="exportWhitePaper">White Paper</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSvg('spec-svg', 'specificity_chart.svg')">
+              <span>📥</span> <span data-i18n="exportSvg">Export SVG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportPng('spec-svg', 'specificity_chart.png')">
+              <span>🖼️</span> <span data-i18n="exportPng">Export PNG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportCsv('specificity')">
+              <span>📊</span> <span data-i18n="exportCsv">Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="view-toolbar" style="justify-content:space-between;">
+          <div class="toolbar-group" style="flex-wrap:wrap;">
+            <span class="control-label" data-i18n="specVarLabel">Metadata Variable:</span>
+            <select id="spec-var-selector" class="dataset-select" style="padding:6px 28px 6px 10px;"></select>
+            <div id="spec-mod-pills" class="toolbar-group" style="flex-wrap:wrap;"></div>
+          </div>
+          <div class="spec-legend">
+            <span class="spec-legend-item"><span class="spec-dot" style="background:#10b981;"></span> <span data-i18n="specOverLabel">Over-represented (+χ²)</span></span>
+            <span class="spec-legend-item"><span class="spec-dot" style="background:#f43f5e;"></span> <span data-i18n="specUnderLabel">Under-represented (−χ²)</span></span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:14px;">
+          <div id="specificity-chart" class="chart-container" style="height:540px;"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 7: CONCORDANCER (KWIC) -->
+      <div id="tab-kwic" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="kwicTitle">Concordancer &amp; Context Units (KWIC)</h2>
+            <p data-i18n="kwicSub">Search lemmas across elementary context units (UCEs) with highlighted left and right context</p>
+          </div>
+        </div>
+
+        <div class="view-toolbar">
+          <div class="toolbar-group">
+            <span class="control-label" data-i18n="kwicSearchLabel">Search corpus:</span>
+            <input id="kwic-search-input" class="input-search" style="width:260px;" type="text" data-i18n-ph="kwicPlaceholder" placeholder="Enter lemma (e.g., phone)...">
+          </div>
+          <div class="toolbar-group" id="kwic-class-pills"></div>
+          <span id="kwic-results-count" class="nav-badge" style="font-size:12px; padding:6px 12px;">0 occurrences</span>
+        </div>
+
+        <div class="card">
+          <div class="table-wrapper" style="max-height:600px; overflow-y:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="text-align:right;" data-i18n="leftContext">Left Context</th>
+                  <th style="text-align:center;" data-i18n="keywordCol">Keyword</th>
+                  <th style="text-align:left;" data-i18n="rightContext">Right Context</th>
+                  <th style="text-align:center;" data-i18n="classLabel">Class</th>
+                  <th data-i18n="metadataCol">Metadata</th>
+                </tr>
+              </thead>
+              <tbody id="kwic-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 8: METADATA CROSS-TABULATION -->
+      <div id="tab-meta" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2 data-i18n="metaTitle">Metadata Cross-Tabulation</h2>
+            <p data-i18n="metaSub">Statistical distribution of Reinert lexical classes across illustrative metadata variables (communities, sources, categories)</p>
+          </div>
+          <div class="section-actions" style="flex-wrap:wrap;">
+            <div class="export-theme-toggle" role="group" data-i18n-title="exportThemeTitle" title="Export chart theme">
+              <button class="export-theme-btn active" data-export-theme="dark" onclick="setExportTheme('dark')" data-i18n="exportDark">Dark</button>
+              <button class="export-theme-btn white-mode" data-export-theme="white" onclick="setExportTheme('white')" data-i18n="exportWhitePaper">White Paper</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSvg('meta-svg', 'metadata_crosstab.svg')">
+              <span>📥</span> <span data-i18n="exportSvg">Export SVG</span>
+            </button>
+            <button class="btn btn-ghost" onclick="exportPng('meta-svg', 'metadata_crosstab.png')">
+              <span>🖼️</span> <span data-i18n="exportPng">Export PNG</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:10px;">
+          <div id="meta-chart" class="chart-container" style="height:520px;"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 9: IMPORT CSV/EXCEL & LIVE CORPUS ANALYZER -->
+      <div id="tab-custom" class="tab-pane">
+        <div class="section-header">
+          <div class="section-title-area">
+            <h2>
+              <span data-i18n="customTitle">Import Corpus &amp; Live Analyzer</span>
+              <span class="privacy-badge">🔒 <span data-i18n="privacyBadgeText">Zero-Retention: Processed in RAM only</span></span>
+            </h2>
+            <p data-i18n="customSub">Upload raw CSV / Excel spreadsheets (Apify, Google Forms, survey exports) with interactive column mapping, or paste classic IRaMuTeQ .txt corpora</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="loadDemoDataset()">
+              <span>⚡</span> <span data-i18n="loadDemoBtn">Load Demo Dataset</span>
+            </button>
+            <a class="btn btn-ghost" href="/api/demo/csv" download="demo_digital_detox.csv" style="text-decoration:none;">
+              <span>📥</span> <span data-i18n="downloadSampleCsv">Sample CSV</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Collapsible Data Recipes Guide -->
+        <details class="recipes-accordion">
+          <summary>
+            <span>📖 <span data-i18n="recipesHeading">Data Recipes — 3-Step Export Guides (Google Forms, Reddit, YouTube Apify)</span></span>
+            <span class="nav-badge" data-i18n="recipesToggleHint">Click to expand</span>
+          </summary>
+          <div class="recipes-grid">
+            <div class="recipe-card">
+              <h4>📋 <span data-i18n="recipeFormsTitle">Google Forms / Survey Export</span></h4>
+              <ol>
+                <li data-i18n="recipeFormsS1">Open your Form → <strong>Responses</strong> → click <strong>Link to Sheets</strong> (or Download <code>.csv</code>).</li>
+                <li data-i18n="recipeFormsS2">Drop the raw <code>.csv</code> or <code>.xlsx</code> file directly below — no <code>****</code> tags needed.</li>
+                <li data-i18n="recipeFormsS3">Pick your open-ended question as <strong>Main Text</strong> and age/role/rating columns as metadata.</li>
+              </ol>
+            </div>
+            <div class="recipe-card">
+              <h4>🟠 <span data-i18n="recipeRedditTitle">Reddit Threads (Apify / Export)</span></h4>
+              <ol>
+                <li data-i18n="recipeRedditS1">Run an Apify Reddit Scraper or PRAW export and download the dataset as <code>.csv</code> or <code>.xlsx</code>.</li>
+                <li data-i18n="recipeRedditS2">Drop the spreadsheet below to launch the 5-row column-mapping preview.</li>
+                <li data-i18n="recipeRedditS3">Map <code>body</code> / <code>text</code> as Main Text and select <code>subreddit</code> + <code>type</code> to unlock Specificity χ².</li>
+              </ol>
+            </div>
+            <div class="recipe-card">
+              <h4>▶️ <span data-i18n="recipeYoutubeTitle">YouTube Comments (Apify)</span></h4>
+              <ol>
+                <li data-i18n="recipeYoutubeS1">Scrape target videos with Apify YouTube Comments Scraper and export as <code>.csv</code> / <code>.xlsx</code>.</li>
+                <li data-i18n="recipeYoutubeS2">Upload directly (up to 15 MB / 15,000 rows processed exclusively in RAM).</li>
+                <li data-i18n="recipeYoutubeS3">Map <code>comment</code> as Main Text, choose Corpus Language + Bigrams, and map <code>channelName</code> as metadata.</li>
+              </ol>
+            </div>
+          </div>
+        </details>
+
+        <div class="custom-grid">
+          <div class="card">
+            <div class="card-title" style="flex-wrap:wrap; gap:8px;">
+              <span data-i18n="uploadZoneHeading">Upload File (.csv, .xlsx, .txt) or Paste Corpus</span>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="quick-sample-btn" onclick="insertSampleCorpus('detox')" data-i18n="sampleDetox">EN: Digital Detox</button>
+                <button class="quick-sample-btn" onclick="insertSampleCorpus('fr')">FR: Sobriété</button>
+                <button class="quick-sample-btn" onclick="insertSampleCorpus('ru')">RU: Детокс</button>
+              </div>
+            </div>
+
+            <!-- Drag & Drop Zone -->
+            <div id="upload-dropzone" class="upload-dropzone" onclick="document.getElementById('custom-file-input').click()">
+              <div class="upload-dropzone-icon">📊</div>
+              <div class="upload-dropzone-title" data-i18n="dropzoneTitle">Drop a .csv, .xlsx, or IRaMuTeQ .txt file here, or click to browse</div>
+              <div class="upload-dropzone-sub" data-i18n="dropzoneSub">CSV &amp; Excel files automatically open a 5-row column-mapping preview (Max 15 MB / 15,000 rows, RAM-only)</div>
+            </div>
+            <input id="custom-file-input" type="file" accept=".csv,.xlsx,.xls,.txt" style="display:none;">
+
+            <textarea id="custom-corpus-text" class="dataset-select" style="width:100%; height:220px; font-family:var(--font-mono); font-size:13px; line-height:1.5; padding:14px; resize:vertical; margin-bottom:14px;" data-i18n-ph="customTextareaPh" placeholder="Or paste classic IRaMuTeQ text (**** *var_val) or raw paragraphs here..."></textarea>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="control-label" data-i18n="corpusLangLabel">Corpus Language:</span>
+                  <select id="custom-corpus-lang" class="dataset-select" style="padding:6px 26px 6px 10px;">
+                    <option value="en" selected>English</option>
+                    <option value="fr">Français</option>
+                    <option value="ru">Русский</option>
+                  </select>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="control-label" data-i18n="targetClassesLabel">Classes:</span>
+                  <select id="custom-target-classes" class="dataset-select" style="padding:6px 24px 6px 10px;">
+                    <option value="5" selected>5</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="3">3</option>
+                  </select>
+                </div>
+                <label class="checkbox-pill">
+                  <input id="custom-detect-bigrams" type="checkbox">
+                  <span data-i18n="detectBigramsLabel">Detect Bigrams (PMI)</span>
+                </label>
+              </div>
+              <button id="run-custom-btn" class="btn btn-primary" style="padding:9px 22px; font-weight:700;">
+                <span>🚀</span> <span data-i18n="runAnalysis">Run Analysis</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span data-i18n="formatGuideTitle">Supported Formats &amp; NLP Pipeline</span>
+              <span class="nav-badge" data-i18n="guideBadge">Reference</span>
+            </div>
+            <div class="guide-box">
+              <p style="margin-bottom:10px;"><strong data-i18n="guideTabularHeading">1. Raw CSV &amp; Excel (.csv, .xlsx):</strong></p>
+              <p style="margin-bottom:12px; color:var(--text-muted);" data-i18n="guideTabularDesc">Upload exports from Apify, Reddit scrapers, or Google Forms. Select your main text column, corpus language, bigram toggle, and metadata columns to auto-generate IRaMuTeQ variables.</p>
+
+              <p style="margin-bottom:8px;"><strong data-i18n="guideTxtHeading">2. Classic IRaMuTeQ (.txt):</strong></p>
+              <pre style="background:var(--bg-primary); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border-color); font-size:12px; margin-bottom:14px; overflow-x:auto;"><code>**** *source_reddit *category_minimalism
+I reduced daily screen time by switching to an e-ink reader.
+
+**** *source_survey *category_wellbeing
+Taking a weekend digital detox improved my focus and sleep.</code></pre>
+
+              <p style="margin-bottom:8px;"><strong data-i18n="guidePipelineHeading">3. Multi-Language Dictionary Lemmatization &amp; Reinert Pipeline:</strong></p>
+              <ul style="padding-left:20px; color:var(--text-muted);">
+                <li data-i18n="guideStep1">EN (WordNet/spaCy), FR (French morphological/spaCy), RU (pymorphy3/spaCy)</li>
+                <li data-i18n="guideStep2">Optional PMI Bigram collocations (e.g., social_media, screen_time, digital_detox)</li>
+                <li data-i18n="guideStep3">Interactive stopword exclusion &amp; instant RAM-only recalculation</li>
+                <li data-i18n="guideStep4">Exact 1-df Pearson χ², Reinert CHD, AFC biplot, MST &amp; Specificity χ²</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- SLIDE-OVER DRAWER: KWIC / CONCORDANCER QUOTE INSPECTOR -->
+  <div id="kwic-drawer-backdrop" class="drawer-backdrop" onclick="closeKwicDrawer()"></div>
+  <aside id="kwic-drawer" class="kwic-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h3 id="drawer-title">Lemma Inspector</h3>
+        <div id="drawer-subtitle" style="font-size:12px; color:var(--text-muted);">Original quotes in context</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+        <button id="drawer-exclude-btn" class="btn btn-danger-ghost" style="font-size:11.5px; padding:5px 10px;" data-i18n="excludeWordBtn">🚫 Exclude &amp; Recalculate</button>
+        <button id="drawer-full-kwic-btn" class="btn btn-ghost" style="font-size:11.5px; padding:5px 10px;" data-i18n="openFullKwic">Full KWIC</button>
+        <button class="btn btn-ghost btn-icon" onclick="closeKwicDrawer()" title="Close">✕</button>
+      </div>
+    </div>
+    <div id="drawer-body" class="drawer-body"></div>
+  </aside>
+
+  <!-- MODAL: CSV / EXCEL COLUMN MAPPING -->
+  <div id="column-map-overlay" class="modal-overlay">
+    <div class="modal-box modal-wide">
+      <button class="modal-close" onclick="closeModals()">✕</button>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding-right:28px; margin-bottom:6px;">
+        <h3 style="font-size:18px;" data-i18n="colMapTitle">Map Spreadsheet Columns to IRaMuTeQ Corpus</h3>
+        <span class="privacy-badge">🔒 <span data-i18n="privacyShort">RAM-Only • Zero Retention</span></span>
+      </div>
+      <p id="col-map-fileinfo" style="font-size:12px; color:var(--text-muted); margin-bottom:16px;"></p>
+
+      <div style="display:grid; grid-template-columns: 1.4fr 1fr 130px; gap:12px; margin-bottom:14px;">
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="col-map-text-select" data-i18n="colMapTextLabel">Main Text Column (Required)</label>
+          <select id="col-map-text-select" class="dataset-select" style="width:100%;"></select>
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="col-map-lang-select" data-i18n="corpusLangLabel">Corpus Language</label>
+          <select id="col-map-lang-select" class="dataset-select" style="width:100%;">
+            <option value="en" selected>English</option>
+            <option value="fr">Français</option>
+            <option value="ru">Русский</option>
+          </select>
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="col-map-classes-select" data-i18n="targetClassesLabel">Target Classes</label>
+          <select id="col-map-classes-select" class="dataset-select" style="width:100%;">
+            <option value="5" selected>5 Classes</option>
+            <option value="4">4 Classes</option>
+            <option value="6">6 Classes</option>
+            <option value="3">3 Classes</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label class="checkbox-pill">
+          <input id="col-map-bigrams-check" type="checkbox">
+          <span data-i18n="detectBigramsModalLabel">Detect Bigrams (join frequent collocations like social_media, screen_time via PMI)</span>
+        </label>
+      </div>
+
+      <div class="form-field">
+        <label data-i18n="colMapMetaLabel">Optional Metadata Columns (Converted to IRaMuTeQ *var_val variables)</label>
+        <div id="col-map-meta-pills" class="meta-col-grid"></div>
+      </div>
+
+      <div class="form-field">
+        <label data-i18n="colMapPreviewLabel">5-Row Data Preview</label>
+        <div class="table-wrapper" style="max-height:210px; overflow:auto;">
+          <table class="data-table">
+            <thead id="col-map-preview-thead"></thead>
+            <tbody id="col-map-preview-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="col-map-error" style="display:none; color:var(--accent-danger); font-size:12px; margin-bottom:10px;"></div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+        <button class="btn btn-ghost" onclick="closeModals()" data-i18n="cancelBtn">Cancel</button>
+        <button id="col-map-run-btn" class="btn btn-primary" onclick="submitColumnMapping()">
+          <span>🚀</span> <span data-i18n="runMappedAnalysis">Run IRaMuTeQ Analysis</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DOCUMENT VIEWER -->
+  <div id="doc-modal-overlay" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModals()">✕</button>
+      <h3 id="doc-modal-title" style="margin-bottom:16px;" data-i18n="docViewerTitle">Document Viewer</h3>
+      <div id="doc-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- GLOBAL TOOLTIP -->
+  <div id="global-tooltip" class="tooltip-custom" style="display:none;"></div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-banner" class="toast-banner"></div>
+
+  <!-- SCRIPTS -->
+  <script src="libs/d3.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

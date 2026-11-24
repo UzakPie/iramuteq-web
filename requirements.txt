@@ -1,0 +1,26 @@
+# IRaMuTeQ Web Studio — Python Backend & Multi-Language NLP Dependencies
+# Core Web Server & API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# Scientific Computing & Tabular Import (CSV / Excel)
+numpy>=1.26.0
+pandas>=2.2.0
+openpyxl>=3.1.2
+
+# Multi-Language Dictionary Lemmatization & POS Tagging
+# - English: NLTK WordNetLemmatizer + POS tagger (auto-downloads wordnet, omw-1.4,
+#   averaged_perceptron_tagger_eng, stopwords on startup)
+# - French:  NLTK French stopwords + morphological lemmatizer
+# - Russian: pymorphy3 full morphological dictionary lemmatizer
+nltk>=3.9.0
+pymorphy3>=2.0.0
+pymorphy3-dicts-ru>=2.4.0
+
+# Optional: spaCy dictionary lemmatizers (auto-detected first if installed).
+# On Python 3.10–3.12 / Docker, you may also install spaCy and models:
+#   pip install spacy>=3.7.0
+#   python -m spacy download en_core_web_sm
+#   python -m spacy download fr_core_news_sm
+#   python -m spacy download ru_core_news_sm
